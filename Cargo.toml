@@ -1,0 +1,10 @@
+[package]
+name = "gloss"
+version = "0.0.1"
+authors = ["Andrew Gibiansky <andrew.gibiansky@gmail.com>"]
+
+[dependencies.glfw]
+git = "https://github.com/bjz/glfw-rs.git"
+
+[dependencies.gl]
+git = "https://github.com/bjz/gl-rs"
