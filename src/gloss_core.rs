@@ -163,7 +163,10 @@ impl GlossWindow {
 
     fn draw_picture(&self, picture: &Picture) {
         match *picture {
+            // Simplest possible picture: nothing.
             Blank => (),
+
+            // Shapes.
             Polygon(ref pts) => {
                 unsafe {
                     self.fill_vertex_buffer(&pts);
@@ -177,6 +180,17 @@ impl GlossWindow {
                     gl::DrawArrays(gl::TRIANGLE_FAN, 0, pts.len() as i32 * 2);
                 }
             },
+
+            // Lines.
+            Line(ref pts) => {
+                unsafe {
+                    gl::Enable(gl::LINE_SMOOTH);
+                    self.fill_vertex_buffer(&pts);
+                    gl::DrawArrays(gl::LINE_STRIP, 0, pts.len() as i32 * 2);
+                }
+            }
+
+            // Transforms.
             Colored(color, ref pic) => {
                 let (r, g, b, a) = color_to_rgba(color);
                 unsafe {
@@ -188,6 +202,15 @@ impl GlossWindow {
                     gl::Uniform4f(self.color_uniform, buf[0], buf[1], buf[2], buf[3]);
                 }
             },
+
+            // Combine many pictures. Draw them in the order they appear.
+            Pictures(ref pics) => {
+                for pic in pics {
+                    self.draw_picture(&pic);
+                }
+            }
+
+            // FIXME: Remove this once all pieces of Picture are implemented.
             _ => println!("Not implemented!"),
         }
     }

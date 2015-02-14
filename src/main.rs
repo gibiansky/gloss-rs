@@ -12,18 +12,16 @@ use event::*;
 mod gloss_core;
 
 fn main() {
-    println!("Trying to open");
     let mut window = gloss_core::GlossWindow::new(400, 400, "Gloss Demo", Color::Black);
-    let pts = vec![point(-150.0, -150.0), point(0.0, 150.0), point(150.0, -150.0)];
-    let mut picture = Colored(Color::Red, box Circle(200.0));
-    println!("Opened");
+    let mut picture = Pictures(vec![
+                               Colored(Color::RGB(0.0, 0.6, 0.8), box Circle(200.0)),
+                               Colored(Color::RGB(0.0, 0.7, 0.9), box Circle(100.0)),
+                               Colored(Color::White, box Line(vec![point(-100.0, -100.0), point(100.0, 100.0)])),
+                               ]);
 
     while !window.done() {
-        println!("In loop");
         window.draw(&picture);
-        println!("Drawn");
         window.update(|event| update_picture(&mut picture, event));
-        println!("Updated");
     }
 }
 
