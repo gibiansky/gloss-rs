@@ -49,13 +49,15 @@ pub enum Picture {
 
 /// A color used for drawing pictures.
 pub enum Color {
-    Red,
-    Green,
-    Blue,
-    White,
     Black,
-    RGB(f32, f32, f32)
+    Blue,
+    Green,
+    Red,
+    White,
+    RGB(f32, f32, f32),
+    RGBA(f32, f32, f32, f32),
 }
+impl Copy for Color {}
 
 /// A point in 2D space.
 pub struct Point {
@@ -71,4 +73,16 @@ pub type BitmapData = bool;
 
 pub fn point(x: f32, y: f32) -> Point {
     Point { x: x, y: y }
+}
+
+pub fn color_to_rgba(color: Color) -> (f32, f32, f32, f32) {
+    match color {
+        Color::RGBA(r, g, b, a) => (r, g, b, a),
+        Color::RGB(r, g, b)     => (r, g, b, 1.0),
+        Color::Black            => (0.0, 0.0, 0.0, 1.0),
+        Color::Blue             => (0.0, 0.0, 1.0, 1.0),
+        Color::Green            => (0.0, 1.0, 0.0, 1.0),
+        Color::Red              => (1.0, 0.0, 0.0, 1.0),
+        Color::White            => (1.0, 1.0, 1.0, 1.0),
+    }
 }

@@ -1,3 +1,4 @@
+#![feature(box_syntax)]
 extern crate gl;
 extern crate glfw;
 
@@ -12,9 +13,9 @@ mod gloss_core;
 
 fn main() {
     println!("Trying to open");
-    let mut window = gloss_core::GlossWindow::new(300, 300, "Gloss Demo", Color::Black);
-    let pts = vec![point(0.5, 0.5), point(1.0, 1.0), point(1.5, 0.0)];
-    let mut picture = Polygon(pts);
+    let mut window = gloss_core::GlossWindow::new(400, 400, "Gloss Demo", Color::Black);
+    let pts = vec![point(-150.0, -150.0), point(0.0, 150.0), point(150.0, -150.0)];
+    let mut picture = Colored(Color::Red, box Circle(200.0));
     println!("Opened");
 
     while !window.done() {
