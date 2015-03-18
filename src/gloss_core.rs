@@ -9,6 +9,7 @@ use picture::*;
 use picture::Picture::*;
 use event::*;
 use event::Event::*;
+use extrude_thickline::*;
 
 use std::mem;
 use std::ptr;
@@ -16,7 +17,6 @@ use std::ffi::CString;
 use std::str;
 use std::sync::mpsc::Receiver;
 use std::num::Float;
-use std::f32::consts::PI_2;
 
 
 // Vertex shader source.
@@ -173,11 +173,29 @@ impl GlossWindow {
                     gl::DrawArrays(gl::TRIANGLE_FAN, 0, pts.len() as i32 * 2);
                 }
             },
+
             Circle(radius) => {
                 unsafe {
                     let pts = circle_to_polygon(radius, 50);
                     self.fill_vertex_buffer(&pts);
                     gl::DrawArrays(gl::TRIANGLE_FAN, 0, pts.len() as i32 * 2);
+                }
+            },
+
+            // Thick lines.
+            ThickCircle(radius, thickness) => {
+                unsafe {
+                    let pts = extrude_thickline(&arc_to_line(radius, 50, 0.0, 360.0), thickness);
+                    self.fill_vertex_buffer(&pts);
+                    gl::DrawArrays(gl::TRIANGLE_STRIP, 0, pts.len() as i32 * 2);
+                }
+            },
+
+            ThickArc(start_angle, end_angle, radius, thickness) => {
+                unsafe {
+                    let pts = extrude_thickline(&arc_to_line(radius, 50, start_angle, end_angle), thickness);
+                    self.fill_vertex_buffer(&pts);
+                    gl::DrawArrays(gl::TRIANGLE_STRIP, 0, pts.len() as i32 * 2);
                 }
             },
 
@@ -188,7 +206,16 @@ impl GlossWindow {
                     self.fill_vertex_buffer(&pts);
                     gl::DrawArrays(gl::LINE_STRIP, 0, pts.len() as i32 * 2);
                 }
-            }
+            },
+
+            Arc(start_angle, end_angle, radius) => {
+                unsafe {
+                    let pts = arc_to_line(radius, 50, start_angle, end_angle);
+                    gl::Enable(gl::LINE_SMOOTH);
+                    self.fill_vertex_buffer(&pts);
+                    gl::DrawArrays(gl::LINE_STRIP, 0, pts.len() as i32 * 2);
+                }
+            },
 
             // Transforms.
             Colored(color, ref pic) => {
@@ -293,15 +320,24 @@ fn link_program(vs: GLuint, fs: GLuint) -> GLuint {
 }
 
 fn circle_to_polygon(radius: f32, n_points: usize) -> Points {
-    let mut pts = Vec::with_capacity(n_points + 1);
+    let mut pts = Vec::with_capacity(n_points + 2);
 
     // The center is just at zero
     pts.push(point(0.0, 0.0));
+    
+    pts.append(&mut arc_to_line(radius, n_points, 0.0, 360.0));
 
-    for i in range(0, n_points + 1) {
-        let f = i as f32 / n_points as f32;
-        let x = radius * (f * PI_2).cos();
-        let y = radius * (f * PI_2).sin();
+    pts
+}
+
+fn arc_to_line(radius: f32, n_points: usize, start_angle: f32, end_angle: f32) -> Points {
+    let mut pts = Vec::with_capacity(n_points + 1);
+
+    for i in 0 .. n_points + 1 {
+        let angle_deg = (i as f32 / n_points as f32) * (end_angle - start_angle) + start_angle;
+        let angle = angle_deg.to_radians();
+        let x = radius * angle.cos();
+        let y = radius * angle.sin();
         pts.push(point(x, y));
     }
 

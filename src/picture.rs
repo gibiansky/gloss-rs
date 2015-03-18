@@ -64,6 +64,7 @@ pub struct Point {
     pub x: f32,
     pub y: f32,
 }
+impl Copy for Point {}
 
 /// A list of points.
 pub type Points = Vec<Point>;
